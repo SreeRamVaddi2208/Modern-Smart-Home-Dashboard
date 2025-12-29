@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Smart Home IoT Data Explorer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-home text-primary"></i> Smart Home IoT Data Exploration & Preparation
+        </h1>
+        <p class="lead text-muted">A comprehensive project for exploring and preparing smart home sensor data</p>
+    </div>
+
+    <!-- Project Overview -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-info-circle"></i> Project Overview</h3>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                This project is designed to help you understand <strong>data exploration</strong> and <strong>data preparation</strong> 
+                using real-world smart home IoT sensor data. We simulate a smart home environment with multiple sensors 
+                collecting data about temperature, humidity, energy usage, motion detection, and appliance status.
+            </p>
+            <p class="card-text">
+                <strong>What is Data Exploration?</strong> It's the process of understanding your data by looking at it, 
+                finding patterns, identifying problems (like missing values), and getting a feel for what the data tells us.
+            </p>
+            <p class="card-text">
+                <strong>What is Data Preparation?</strong> It's the process of cleaning and organizing your data so it's 
+                ready for analysis. This includes fixing missing values, removing duplicates, and creating new useful features.
+            </p>
+        </div>
+    </div>
+
+    <!-- Problem Statement -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-question-circle"></i> Problem Statement</h3>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Smart homes generate massive amounts of sensor data every day. Before we can analyze this data to make 
+                intelligent decisions (like optimizing energy usage or improving comfort), we need to:
+            </p>
+            <ul>
+                <li><strong>Explore</strong> the raw data to understand what we have</li>
+                <li><strong>Identify</strong> data quality issues (missing values, duplicates, errors)</li>
+                <li><strong>Prepare</strong> the data by cleaning and transforming it</li>
+                <li><strong>Extract</strong> meaningful features (like peak usage hours, daily patterns)</li>
+            </ul>
+            <p class="card-text">
+                This project demonstrates how to perform these tasks using Python, Pandas, and Flask.
+            </p>
+        </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-bullseye"></i> Project Objectives</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-check-circle text-success"></i> Data Exploration</h5>
+                    <ul>
+                        <li>View raw sensor data in tabular format</li>
+                        <li>Identify missing values and their patterns</li>
+                        <li>Understand data distribution and statistics</li>
+                        <li>Detect duplicate records</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-check-circle text-success"></i> Data Preparation</h5>
+                    <ul>
+                        <li>Handle missing values using appropriate strategies</li>
+                        <li>Remove duplicate records</li>
+                        <li>Convert timestamps to proper datetime format</li>
+                        <li>Extract features (hour, day of week, peak usage)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dataset Description -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-database"></i> Smart Home Sensor Dataset</h3>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Our simulated dataset contains the following sensors:</p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-thermometer-half text-danger"></i> Temperature</h5>
+                            <p class="text-muted">Room temperature in Celsius (°C)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-tint text-info"></i> Humidity</h5>
+                            <p class="text-muted">Air humidity percentage (%)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-bolt text-warning"></i> Energy Usage</h5>
+                            <p class="text-muted">Power consumption in kilowatt-hours (kWh)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-running text-success"></i> Motion Detection</h5>
+                            <p class="text-muted">Binary indicator (1 = motion detected, 0 = no motion)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-plug text-primary"></i> Appliance Status</h5>
+                            <p class="text-muted">State of appliances (ON/OFF)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                    <h4>Data Exploration</h4>
+                    <p class="text-muted">View raw data, identify missing values, and understand data distribution</p>
+                    <a href="/exploration" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> Explore Data
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                    <h4>Dashboard</h4>
+                    <p class="text-muted">View cleaned data, visualizations, and insights from prepared data</p>
+                    <a href="/dashboard" class="btn btn-success">
+                        <i class="fas fa-arrow-right"></i> View Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3><i class="fas fa-rocket"></i> Quick Start Guide</h3>
+        </div>
+        <div class="card-body">
+            <ol>
+                <li><strong>Generate Data:</strong> Run <code>python generate_data.py</code> to create the sensor data CSV file</li>
+                <li><strong>Start Flask App:</strong> Run <code>python app.py</code> to start the web application</li>
+                <li><strong>Open Browser:</strong> Navigate to <code>http://127.0.0.1:5000</code></li>
+                <li><strong>Explore:</strong> Use the navigation menu to explore data and view the dashboard</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

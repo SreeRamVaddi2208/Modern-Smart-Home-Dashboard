@@ -1,0 +1,150 @@
+<div class="container">
+  <div class="text-center mb-4">
+    <h1 class="display-5 mb-3">
+      <i class="fas fa-chart-line text-success"></i> Data Dashboard
+    </h1>
+    <p class="lead text-muted">Visualizations and insights from prepared (cleaned) data</p>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && preparationSummary">
+    <!-- Data Preparation Summary -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h3><i class="fas fa-check-circle"></i> Data Preparation Summary</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="alert alert-info">
+              <strong>Duplicates Removed:</strong> {{ preparationSummary.duplicatesRemoved }}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="alert alert-success">
+              <strong>Total Clean Records:</strong> {{ preparationSummary.totalRecords }}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="alert alert-warning">
+              <strong>Status:</strong> Data Ready for Analysis
+            </div>
+          </div>
+        </div>
+        <p class="text-muted">
+          <strong>What was done:</strong> Missing values were filled with median values, duplicates were removed, 
+          and new features (hour, day of week, peak usage) were extracted from timestamps.
+        </p>
+      </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="insight-card">
+          <h5><i class="fas fa-thermometer-half"></i> Average Temperature</h5>
+          <h2>{{ insights.avgTemperature }}°C</h2>
+          <small>Range: {{ insights.minTemperature }}°C - {{ insights.maxTemperature }}°C</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="insight-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <h5><i class="fas fa-tint"></i> Average Humidity</h5>
+          <h2>{{ insights.avgHumidity }}%</h2>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="insight-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+          <h5><i class="fas fa-bolt"></i> Total Energy</h5>
+          <h2>{{ insights.totalEnergy }} kWh</h2>
+          <small>Avg: {{ insights.avgEnergy }} kWh</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="insight-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+          <h5><i class="fas fa-running"></i> Motion Detections</h5>
+          <h2>{{ insights.motionDetections }}</h2>
+          <small>{{ insights.motionPercentage }}% of time</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h4><i class="fas fa-chart-line"></i> Temperature Over Time</h4>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="temperatureChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h4><i class="fas fa-chart-bar"></i> Energy Usage by Hour</h4>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="hourlyEnergyChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h4><i class="fas fa-chart-area"></i> Energy Usage by Day of Week</h4>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="dailyEnergyChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Insights -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h4><i class="fas fa-clock"></i> Peak Usage Hour</h4>
+          </div>
+          <div class="card-body text-center">
+            <h1 class="display-3 text-primary">{{ insights.peakHour }}:00</h1>
+            <p class="text-muted">Hour with highest average energy consumption</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h4><i class="fas fa-plug"></i> Appliance Status</h4>
+          </div>
+          <div class="card-body text-center">
+            <h1 class="display-3 text-success">{{ insights.appliancesOn }}</h1>
+            <p class="text-muted">Appliances ON: {{ insights.applianceOnPercentage }}% of time</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

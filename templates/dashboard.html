@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Home IoT Data Explorer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .insight-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .insight-card h5 {
+        opacity: 0.9;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    .insight-card h2 {
+        font-size: 2rem;
+        margin: 0;
+        font-weight: bold;
+    }
+    .insight-card small {
+        opacity: 0.85;
+        display: block;
+        margin-top: 5px;
+    }
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-chart-line text-success"></i> Data Dashboard
+        </h1>
+        <p class="lead text-muted">Visualizations and insights from prepared (cleaned) data</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% else %}
+
+    <!-- Data Preparation Summary -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0"><i class="fas fa-check-circle"></i> Data Preparation Summary</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="alert alert-info mb-0">
+                        <strong>Duplicates Removed:</strong> {{ duplicates_removed|default(0) }}
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="alert alert-success mb-0">
+                        <strong>Total Clean Records:</strong> {{ total_records|default(0) }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="alert alert-warning mb-0">
+                        <strong>Status:</strong> Data Ready for Analysis
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted mt-3 mb-0">
+                <strong>What was done:</strong> Missing values were filled with median values, duplicates were removed, 
+                and new features (hour, day of week, peak usage) were extracted from timestamps.
+            </p>
+        </div>
+    </div>
+
+    <!-- Key Insights -->
+    {% if insights %}
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="insight-card">
+                <h5><i class="fas fa-thermometer-half"></i> Average Temperature</h5>
+                <h2>{{ insights.avg_temperature|default(0)|round(1) }}°C</h2>
+                <small>Range: {{ insights.min_temperature|default(0)|round(1) }}°C - {{ insights.max_temperature|default(0)|round(1) }}°C</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="insight-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h5><i class="fas fa-tint"></i> Average Humidity</h5>
+                <h2>{{ insights.avg_humidity|default(0)|round(1) }}%</h2>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="insight-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <h5><i class="fas fa-bolt"></i> Total Energy</h5>
+                <h2>{{ insights.total_energy|default(0)|round(1) }} kWh</h2>
+                <small>Avg: {{ insights.avg_energy|default(0)|round(2) }} kWh</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="insight-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <h5><i class="fas fa-running"></i> Motion Detections</h5>
+                <h2>{{ insights.motion_detections|default(0) }}</h2>
+                <small>{{ insights.motion_percentage|default(0)|round(1) }}% of time</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> Temperature Over Time</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <small>This chart shows how temperature changes over time. Notice the daily patterns 
+                        (warmer during day, cooler at night).</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Energy Usage by Hour</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="hourlyEnergyChart"></canvas>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <small>This shows average energy consumption for each hour of the day. 
+                        Peak usage typically occurs during daytime hours.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-area"></i> Energy Usage by Day of Week</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dailyEnergyChart"></canvas>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <small>This chart compares average energy usage across different days of the week. 
+                        Weekends might show different patterns than weekdays.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Insights -->
+    {% if insights %}
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-clock"></i> Peak Usage Hour</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-3 text-primary">{{ insights.peak_hour|default(0) }}:00</h1>
+                    <p class="text-muted mb-0">Hour with highest average energy consumption</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-plug"></i> Appliance Status</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-3 text-success">{{ insights.appliances_on|default(0) }}</h1>
+                    <p class="text-muted mb-0">Appliances ON: {{ insights.appliance_on_percentage|default(0)|round(1) }}% of time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Data Preparation Steps Explanation -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0"><i class="fas fa-cogs"></i> Data Preparation Steps Explained</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-fill-drip text-primary"></i> 1. Handling Missing Values</h5>
+                    <p class="mb-0">We filled missing numeric values with the <strong>median</strong> (middle value) of that column. 
+                    This preserves the data distribution better than using the mean.</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-trash text-danger"></i> 2. Removing Duplicates</h5>
+                    <p class="mb-0">Duplicate records were identified and removed. These are exact copies that can bias our analysis 
+                    and waste computational resources.</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-calendar-alt text-info"></i> 3. Timestamp Conversion</h5>
+                    <p class="mb-0">Timestamps were converted from strings to proper datetime format, allowing us to extract 
+                    time-based features like hour and day of week.</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-magic text-success"></i> 4. Feature Extraction</h5>
+                    <p class="mb-0">We created new useful features:</p>
+                    <ul class="mb-0">
+                        <li><strong>hour:</strong> Hour of day (0-23)</li>
+                        <li><strong>day_of_week:</strong> Day number (0=Monday, 6=Sunday)</li>
+                        <li><strong>is_peak_hour:</strong> Boolean indicating high energy usage hours</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script id="chart-data" type="application/json">{{ chart_data|default({})|tojson|safe }}</script>
+<script>
+// Render charts once DOM is ready; read JSON from a script tag to avoid Jinja in JS.
+document.addEventListener('DOMContentLoaded', function () {
+    const chartDataEl = document.getElementById('chart-data');
+    const chartData = chartDataEl ? JSON.parse(chartDataEl.textContent || '{}') : {};
+
+    // Temperature Chart
+    if (chartData.temperature) {
+        const tempCtx = document.getElementById('temperatureChart');
+        if (tempCtx) {
+            new Chart(tempCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.temperature.timestamps,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: chartData.temperature.values,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'Temperature (°C)' }
+                        },
+                        x: {
+                            ticks: { maxRotation: 45, minRotation: 45, autoSkip: true, maxTicksLimit: 10 }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Hourly Energy Chart
+    if (chartData.hourly_energy) {
+        const hourlyCtx = document.getElementById('hourlyEnergyChart');
+        if (hourlyCtx) {
+            new Chart(hourlyCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.hourly_energy.hours,
+                    datasets: [{
+                        label: 'Average Energy Usage (kWh)',
+                        data: chartData.hourly_energy.values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(54, 162, 235, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Energy Usage (kWh)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Hour of Day' }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Daily Energy Chart
+    if (chartData.daily_energy) {
+        const dailyCtx = document.getElementById('dailyEnergyChart');
+        if (dailyCtx) {
+            new Chart(dailyCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.daily_energy.days,
+                    datasets: [{
+                        label: 'Average Energy Usage (kWh)',
+                        data: chartData.daily_energy.values,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Energy Usage (kWh)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Day of Week' }
+                        }
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

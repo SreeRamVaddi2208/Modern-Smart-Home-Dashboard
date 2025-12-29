@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Data Exploration - Smart Home IoT Data Explorer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-search text-primary"></i> Data Exploration
+        </h1>
+        <p class="lead text-muted">Explore raw sensor data, identify issues, and understand data characteristics</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% else %}
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ total_records }}</h3>
+                <p><i class="fas fa-database"></i> Total Records</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>{{ columns|length }}</h3>
+                <p><i class="fas fa-columns"></i> Columns</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <h3>{{ missing_count }}</h3>
+                <p><i class="fas fa-exclamation-circle"></i> Missing Values</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <h3>{{ duplicate_count }}</h3>
+                <p><i class="fas fa-copy"></i> Duplicates</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Quality Issues -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-clipboard-check"></i> Data Quality Summary</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Missing Values by Column</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Missing Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for col, count in summary.missing_values.items() %}
+                            <tr>
+                                <td>{{ col }}</td>
+                                <td>
+                                    {% if count > 0 %}
+                                    <span class="badge bg-warning">{{ count }}</span>
+                                    {% else %}
+                                    <span class="badge bg-success">0</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Data Types</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Data Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for col, dtype in summary.data_types.items() %}
+                            <tr>
+                                <td>{{ col }}</td>
+                                <td><span class="badge bg-info">{{ dtype }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Numeric Summary Statistics -->
+    {% if summary.numeric_summary %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-bar"></i> Numeric Summary Statistics</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Statistic</th>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Count</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('count', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Mean</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('mean', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Std Dev</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('std', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Min</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('min', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>25%</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('25%', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>50% (Median)</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('50%', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>75%</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('75%', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Max</strong></td>
+                            {% for col in summary.numeric_summary.keys() %}
+                            <td>{{ "%.2f"|format(summary.numeric_summary[col].get('max', 0)) }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-muted mt-3">
+                <small>
+                    <strong>Understanding these statistics:</strong><br>
+                    • <strong>Count:</strong> Number of non-null values<br>
+                    • <strong>Mean:</strong> Average value<br>
+                    • <strong>Std Dev:</strong> How spread out the values are (higher = more variation)<br>
+                    • <strong>Min/Max:</strong> Smallest and largest values<br>
+                    • <strong>25%, 50%, 75%:</strong> Percentiles (50% is the median - middle value)
+                </small>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Sample Data Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3><i class="fas fa-table"></i> Sample Data (First 100 Records)</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-striped table-hover table-sm">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            {% for col in columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in sample_data %}
+                        <tr>
+                            {% for col in columns %}
+                            <td>
+                                {% if record[col] is none or record[col] == 'nan' %}
+                                <span class="badge bg-warning">Missing</span>
+                                {% else %}
+                                {{ record[col] }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-muted mt-3">
+                <small>
+                    <strong>What to look for:</strong><br>
+                    • Missing values (shown as "Missing" badges)<br>
+                    • Unusual values (very high or very low numbers)<br>
+                    • Data format consistency (dates, numbers, text)
+                </small>
+            </p>
+        </div>
+    </div>
+
+    <!-- Data Exploration Steps Explanation -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-lightbulb"></i> Data Exploration Steps Explained</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-eye text-primary"></i> 1. Viewing Raw Data</h5>
+                    <p>We start by looking at the actual data to see what we're working with. This helps us understand the structure and spot obvious issues.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-search-minus text-warning"></i> 2. Identifying Missing Values</h5>
+                    <p>Missing values are gaps in our data. We count how many are missing in each column to understand data completeness.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-chart-pie text-info"></i> 3. Understanding Distribution</h5>
+                    <p>We calculate statistics (mean, median, min, max) to understand how values are distributed across the dataset.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-copy text-danger"></i> 4. Finding Duplicates</h5>
+                    <p>Duplicate records are exact copies that can skew our analysis. We identify and count them for removal during data preparation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
+
