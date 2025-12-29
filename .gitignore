@@ -26,3 +26,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 node_modules
+
+# project-specific ignores
+angular-project/node_modules/
+*.pyc
+.DS_Store
+public/.DS_Store
+public/images/.DS_Store
