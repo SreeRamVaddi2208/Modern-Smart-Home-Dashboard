@@ -66,10 +66,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "smart-home-iot-explorer:build:production"
+              "browserTarget": "smart-home-iot-explorer:build:production"
             },
             "development": {
-              "buildTarget": "smart-home-iot-explorer:build:development"
+              "browserTarget": "smart-home-iot-explorer:build:development"
             }
           },
           "defaultConfiguration": "development"
